@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>착수신고서</title>
+    <style>
+        @font-face { font-family: 'KoPub Batang'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/KoPubBatang-Regular.woff') format('woff'); }
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+            @bottom-left { /* [수정] 오른쪽에서 왼쪽으로 이동 및 굵게 */
+                content: '{{ client_name }}{{ contract_official_name }} 귀하';
+                font-family: 'KoPub Batang', serif;
+                font-size: 14pt;
+                font-weight: bold;
+            }
+        }
+        body { font-family: 'KoPub Batang', serif; font-size: 12pt; line-height: 1.8; word-break: keep-all; }
+        h1, h2, h3 { text-align: center; font-weight: bold; margin: 0; padding: 0; }
+        h1 { font-size: 24pt; letter-spacing: 0.5em; text-indent: 0.5em; margin-bottom: 50px; }
+        h2 { font-size: 18pt; margin: 40px 0 30px 0; border-bottom: 2px double black; padding-bottom: 10px; width: 100%; display: block; }
+        .page-break { page-break-before: always; }
+        table { width: 100%; border-collapse: collapse; text-align: center; margin-top: 20px; font-size: 11pt; }
+        th, td { border: 1px solid black; padding: 10px; height: 28px; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .text-left { text-align: left !important; }
+        .seal-container { position: relative; display: inline-block; }
+        .seal-image { position: absolute; right: -45px; top: 50%; transform: translateY(-50%); width: 55px; height: 55px; opacity: 0.8; }
+        .seal-sign { position: relative; width: 100px; height: 50px; }
+        ul { list-style: none; padding-left: 0; }
+        li { margin-bottom: 15px; }
+        .gantt-table { table-layout: fixed; }
+        .gantt-bar { background-color: #5b9bd5; height: 100%; width: 100%; display:block; }
+        /* [추가] 왼쪽 정렬용 컨테이너 */
+        .left-aligned-container {
+            width: 80%;
+            margin-left: 0;
+            margin-right: auto;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <!-- ########## 1. 표지 ########## -->
+    <h1 style="margin-top: 80px;">착 수 계</h1>
+    <ul style="margin-top: 50px; font-size: 14pt;">
+        <li>1. 용 역 명 : {{ project_name }}</li>
+        <li>2. 계약금액 : {{ contract_amount_formatted }}</li>
+        <li>3. 계약년월일 : {{ contract_date }}</li>
+        <li>4. 착수년월일 : {{ start_date }}</li>
+        <li>5. 완료예정일 : {{ completion_date }}</li>
+    </ul>
+    <p style="margin-top: 50px;">위와 같이 착수계를 제출합니다.</p>
+    <p style="margin-top: 20px; text-indent: 1em;">붙임 1. 용역책임기술자 선임계 1부.</p>
+    <p style="text-indent: 1em; margin-top: 5px;">2. 참여기술자 인적사항 1부.</p>
+    <p style="text-indent: 1em; margin-top: 5px;">3. 보안각서 1부.</p>
+    <p style="text-indent: 1em; margin-top: 5px;">4. 용역 공정예정표 1부.</p>
+    
+    <!-- [수정] 계약자 정보 중앙 -> 왼쪽 정렬 -->
+    <div class="left-aligned-container" style="margin-top: 80px; text-align: center;">
+        <p>{{ submission_date }}</p>
+    </div>
+    <div class="left-aligned-container" style="margin-top: 40px; text-align: left; padding-left: 50px;">
+        <p>주 소 : {{ contractor_address }}</p>
+        <p>상 호 : <span class="seal-container">{{ contractor_name }}<img src="../static/images/seal_main.png" class="seal-image"></span></p>
+        <!-- [수정] (인) 추가 -->
+        <p>대 표 : {{ contractor_ceo }} (인)</p>
+    </div>
+    <!-- [수정] 감독자 경유 위치 및 정렬 변경 -->
+    <p style="margin-top: 30px; text-align: left;">감독자 경유 :                          (인)</p>
+
+    <!-- ########## 2. 용역책임기술자 선임계 ########## -->
+    <div class="page-break">
+        <h2>용역책임기술자 선임계</h2>
+        <p class="text-left">용역명 : {{ project_name }}</p>
+        <p class="text-left" style="margin-top: 30px;">상기 용역과업을 수행하기 위하여 다음의 기술자를 용역책임기술자로 선임하여 제출하오니 승인하여 주시기 바라며, 용역수행에 만전을 기하겠습니다.</p>
+        <h3 style="font-size:14pt; margin-top:50px; text-align:center;">- 다 음 -</h3>
+        <table>
+            <tr><th style="width:25%;">성 명</th><td>{{ lead_engineer.name }}</td></tr>
+            <tr><th>주민등록번호</th><td>{{ lead_engineer.resident_no }}</td></tr>
+            <tr><th>소속회사 및 직위</th><td>{{ contractor_name }} / {{ lead_engineer.position }}</td></tr>
+            <tr><th>기술자격 종목</th><td>{{ lead_engineer.field }}</td></tr>
+            <tr><th>기술등급</th><td>{{ lead_engineer.grade }}</td></tr>
+        </table>
+        <!-- [수정] 계약자 정보 중앙 -> 왼쪽 정렬 -->
+        <div class="left-aligned-container" style="margin-top: 80px; text-align: center;">
+            <p>{{ submission_date }}</p>
+        </div>
+        <div class="left-aligned-container" style="margin-top: 40px; text-align: left; padding-left: 50px;">
+            <p>주 소 : {{ contractor_address }}</p>
+            <p>상 호 : <span class="seal-container">{{ contractor_name }}<img src="../static/images/seal_main.png" class="seal-image"></span></p>
+            <p>대 표 : {{ contractor_ceo }} (인)</p>
+        </div>
+    </div>
+
+    <!-- ########## 3. 참여기술자 인적사항 ########## -->
+    <div class="page-break">
+        <h2>참여기술자 인적사항</h2>
+        <table>
+            <thead>
+                <tr><th style="width: 15%;">구분</th><th style="width: 20%;">분야</th><th style="width: 15%;">성명</th><th>주민등록번호</th><th>기술등급</th></tr>
+            </thead>
+            <tbody>
+            {% for engineer in engineers %}
+                <tr>
+                    <td>{{ engineer.position }}</td><td>{{ engineer.field }}</td><td>{{ engineer.name }}</td>
+                    <td>{{ engineer.resident_no }}</td><td>{{ engineer.grade }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- ########## 4. 보안각서 ########## -->
+    <div class="page-break">
+        <h2>보 안 각 서</h2>
+        <p class="text-left" style="margin-top:30px;">본인은 {{ contract_date }} 계약 체결한 『{{ project_name }}』을 시행함에 있어 다음 사항을 준수할 것을 엄숙히 서약하며, 만일 이를 위반 시에는 어떠한 처벌도 감수할 것을 서약합니다.</p>
+        <p class="text-left">1. 본 용역과 관련하여 알게 된 모든 사항은 계약기간중은 물론, 계약기간 만료 후에도 외부에 누설하지 않는다.</p>
+        <p class="text-left">2. 용역수행 책임자로서 용역수행 전반에 대한 보안상 문제점이 없도록 하고, 참여자에 대한 보안교육을 월 1회 이상 실시한다.</p>
+        <h3 style="margin-top: 50px;">- 참 여 자 명 단 -</h3>
+        <table style="font-size:10pt;">
+            <thead><tr><th>소 속</th><th>직 위</th><th>성 명</th><th>서 명</th></tr></thead>
+            <tbody>
+            {% for engineer in engineers %}
+                <tr>
+                    <td>{{ contractor_name }}</td><td>{{ engineer.position }}</td><td>{{ engineer.name }}</td>
+                    <td><img src="../static/images/{{ engineer.seal_image_filename }}" class="seal-sign"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ########## 5. 용역 공정예정표 ########## -->
+    <div class="page-break">
+        <h2>용역 공정예정표</h2>
+        <table class="gantt-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 20%;">공 종</th>
+                    <th colspan="{{ gantt_tasks[0].total_months if gantt_tasks else 12 }}">2024년 ~ 2025년</th>
+                </tr>
+                <tr>
+                    {% set start_y, start_m = (2024, 7) %}
+                    {% for i in range(gantt_tasks[0].total_months) %}
+                        {% set m = (start_m + i - 1) % 12 + 1 %}
+                        <th>{{ m }}월</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for task in gantt_tasks %}
+                <tr>
+                    <td class="text-left">{{ task.task_name }}</td>
+                    {% for i in range(task.total_months) %}
+                        {% set current_m = (start_m + i - 1) % 12 + 1 %}
+                        {% set start_ok = task.start_month <= task.end_month %}
+                        <td>
+                        {% if (start_ok and task.start_month <= current_m < task.end_month) or (not start_ok and (current_m >= task.start_month or current_m < task.end_month)) %}
+                            <div class="gantt-bar"> </div>
+                        {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

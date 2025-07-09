@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>착수신고서</title>
+    <style>
+        @font-face { font-family: 'KoPub Batang'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/KoPubBatang-Regular.woff') format('woff'); }
+        
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+            @bottom-left {
+                content: '{{ clients[0].company_name }}{{ contract_official_name }} 귀하';
+                font-family: 'KoPub Batang', serif;
+                font-size: 14pt;
+                font-weight: bold;
+            }
+        }
+        
+        body { font-family: 'KoPub Batang', serif; font-size: 12pt; line-height: 1.8; word-break: keep-all; }
+        h1, h2, h3 { text-align: center; font-weight: bold; margin: 0; padding: 0; }
+        h1 { font-size: 24pt; letter-spacing: 0.5em; text-indent: 0.5em; margin-top: 50px; margin-bottom: 50px; }
+        h2 { font-size: 18pt; margin-top: 0; margin-bottom: 30px; border-bottom: 2px double black; padding-bottom: 10px; }
+        
+        .page-container { display: flex; flex-direction: column; height: 95%; }
+        .page-content { flex-grow: 1; }
+        .page-break { page-break-before: always; }
+
+        table { width: 100%; border-collapse: collapse; text-align: center; margin-top: 20px; font-size: 11pt; }
+        th, td { border: 1px solid black; padding: 10px; height: 28px; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        
+        .text-left { text-align: left !important; }
+        .text-center { text-align: center !important; }
+        
+        ul { list-style: none; padding-left: 0; }
+        li { margin-bottom: 15px; }
+
+        .seal-container { position: relative; display: inline-block; }
+        .seal-image { position: absolute; right: -45px; top: 50%; transform: translateY(-50%); width: 55px; opacity: 0.8; }
+        .seal-sign { position: relative; width: 100px; height: 50px; }
+        
+        .footer-block { flex-shrink: 0; margin-top: 40px; }
+        .footer-block .submission-date { text-align: center; margin-bottom: 20px; }
+        .footer-block .contractor-info-container { display: flex; }
+        .footer-block .contractor-block { text-align: left; margin: 0 10px; }
+
+        .doc-header-table { margin-bottom: 30px; font-size: 11pt; }
+        .doc-header-table td { text-align: left; padding-left: 10px; }
+        .doc-header-table th { width: 120px; }
+
+        .gantt-table { table-layout: fixed; }
+        .gantt-bar { background-color: #5b9bd5; height: 100%; width: 100%; display:block; }
+    </style>
+</head>
+<body>
+    <!-- ########## [페이지 템플릿] 반복되는 하단 정보 ########## -->
+    {% macro page_footer(align_class='center', show_project_name=False) %}
+    <div class="footer-block">
+        {% if show_project_name %}
+        <p class="text-left">용역명 : {{ project_name }}</p>
+        {% endif %}
+        <p class="submission-date">{{ submission_date }}</p>
+        <div class="contractor-info-container" style="justify-content: {{ align_class }};">
+            {% for contractor in contractors %}
+            <div class="contractor-block">
+                <p>주 소 : {{ contractor.address }}</p>
+                <p>상 호 : <span class="seal-container">{{ contractor.company_name }}<img src="../static/images/seal_main.png" class="seal-image"></span></p>
+                <p>대 표 : {{ contractor.ceo_name }} (인)</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endmacro %}
+
+    <!-- ########## 1. 표지 ########## -->
+    <div class="page-container">
+        <div class="page-content">
+            <p style="text-align: right; margin:0;">감독자 경유 :                          (인)</p>
+            <h1>착 수 계</h1>
+            <ul style="font-size: 14pt;">
+                <li>1. 용 역 명 : {{ project_name }}</li>
+                <li>2. 계약금액 : ₩{{ "{:,}".format(contract_amount) }} (금 {{ contract_amount_hangeul }}원정)</li>
+                <li>3. 계약년월일 : {{ contract_date }}</li>
+                <li>4. 착수년월일 : {{ start_date }}</li>
+                <li>5. 완료예정일 : {{ completion_date }}</li>
+            </ul>
+            <p class="text-center" style="margin-top: 50px;">위와 같이 착수계를 제출합니다.</p>
+        </div>
+        {{ page_footer('center') }}
+    </div>
+
+    <!-- ########## 2. 용역책임기술자 선임계 ########## -->
+    <div class="page-break page-container">
+        <div class="page-content">
+            <h2>용역책임기술자 선임계</h2>
+            <p class="text-left" style="margin-top: 30px;">상기 용역과업을 수행하기 위하여 다음의 기술자를 용역책임기술자로 선임하여 제출하오니 승인하여 주시기 바라며, 용역수행에 만전을 기하겠습니다.</p>
+            <table>
+                <tr><th style="width:25%;">성 명</th><td class="text-left">{{ lead_engineer.name }}</td></tr>
+                <tr><th>주민등록번호</th><td class="text-left">{{ lead_engineer.resident_no }}</td></tr>
+                <tr><th>소속회사 및 직위</th><td class="text-left">{{ contractors[0].company_name }} / {{ lead_engineer.position }}</td></tr>
+            </table>
+        </div>
+        {{ page_footer('flex-end', show_project_name=True) }}
+    </div>
+    
+    <!-- ########## 3. 참여기술자 인적사항 ########## -->
+    <div class="page-break page-container">
+        <div class="page-content">
+            <h2>참여기술자 인적사항</h2>
+            <table class="doc-header-table">
+                <tr><th>용 역 명</th><td>{{ project_name }}</td></tr>
+                <tr><th>용역기간</th><td>{{ start_date }} ~ {{ completion_date }}</td></tr>
+                <tr><th>계약금액</th><td>₩{{ "{:,}".format(contract_amount) }}</td></tr>
+            </table>
+            <table>
+                <thead><tr><th>구분</th><th>분야</th><th>성명</th><th>주민등록번호</th><th>기술등급</th></tr></thead>
+                <tbody>
+                {% for engineer in engineers %}
+                    <tr>
+                        <td>{{ engineer.position }}</td><td>{{ engineer.field }}</td><td>{{ engineer.name }}</td>
+                        <td>{{ engineer.resident_no }}</td><td>{{ engineer.grade }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {{ page_footer('flex-end') }}
+    </div>
+    
+    <!-- ########## [신설] 4. 회사 대표 보안각서 ########## -->
+    <div class="page-break page-container">
+        <div class="page-content">
+            <h2 style="letter-spacing: 0.5em; text-indent: 0.5em;">보 안 각 서</h2>
+            <p style="margin-top: 50px;">❍ 용 역 명 : {{ project_name }}</p>
+            <p style="margin-top: 30px;">1. 본인 및 당사 직원은 제주특별자치도와 계약한 위 용역을 수행함에 있어 계약조건의 제반보안사항을 준수할 것이며, 본 용역 수행 상 대내외적으로 지득한 모든 사항에 대하여 타인에게 누설하거나 귀 제주특별자치도의 승인 없이 정보 및 자료를 제공 또는 대여하지 않겠습니다.</p>
+            <p style="margin-top: 15px;">2. 만약 보완 대책을 소홀히 하거나 이행치 않아서 보안상 문제점이 발생할 때에는 제주특별자치도의 어떠한 조치나 처벌도 감수할 것을 서약하고 이에 각서를 제출합니다.</p>
+        </div>
+        {{ page_footer('center') }}
+    </div>
+
+    <!-- ########## 5. 참여자 연명 보안각서 ########## -->
+    <div class="page-break page-container">
+        <div class="page-content">
+            <h2>보 안 각 서</h2>
+            <p class="text-left" style="margin-top:30px;">본인은 {{ contract_date }} 계약 체결한 『{{ project_name }}』을 시행함에 있어 다음 사항을 준수할 것을 엄숙히 서약하며, 만일 이를 위반 시에는 어떠한 처벌도 감수할 것을 서약합니다.</p>
+            <p class="text-center" style="margin-top: 50px; font-weight: bold;">- 참 여 자 명 단 -</p>
+            <table style="font-size:10pt;">
+                <thead><tr><th>소 속</th><th>직 위</th><th>성 명</th><th>서 명</th></tr></thead>
+                <tbody>
+                {% for engineer in engineers %}
+                    <tr>
+                        <td>{{ contractors[0].company_name }}</td><td>{{ engineer.position }}</td><td>{{ engineer.name }}</td>
+                        <td><img src="../static/images/{{ engineer.seal_image_filename }}" class="seal-sign"></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {{ page_footer('flex-end') }}
+    </div>
+
+    <!-- ########## 6. 용역 공정예정표 ########## -->
+    <div class="page-break page-container">
+        <div class="page-content">
+            <h2>용역 공정예정표</h2>
+            <!-- [신설] 헤더 정보 추가 -->
+            <table class="doc-header-table">
+                <tr><th>용 역 명</th><td>{{ project_name }}</td></tr>
+                <tr><th>용역기간</th><td>{{ start_date }} ~ {{ completion_date }}</td></tr>
+                <tr><th>계약금액</th><td>₩{{ "{:,}".format(contract_amount) }}</td></tr>
+            </table>
+            <table class="gantt-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 20%;">공 종</th>
+                        <th colspan="{{ gantt_tasks[0].total_months if gantt_tasks else 12 }}">2024년 ~ 2025년</th>
+                    </tr>
+                    <tr>
+                        {% set start_y, start_m = (2024, 7) %}
+                        {% for i in range(gantt_tasks[0].total_months if gantt_tasks else 0) %}
+                            {% set m = (start_m + i - 1) % 12 + 1 %}
+                            <th>{{ m }}월</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for task in gantt_tasks %}
+                    <tr>
+                        <td class="text-left">{{ task.task_name }}</td>
+                        {% for i in range(task.total_months) %}
+                            {% set current_m = (start_m + i - 1) % 12 + 1 %}
+                            {% set start_ok = task.start_month <= task.end_month %}
+                            <td>
+                            {% if (start_ok and task.start_month <= current_m < task.end_month) or (not start_ok and (current_m >= task.start_month or current_m < task.end_month)) %}
+                                <div class="gantt-bar"> </div>
+                            {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {{ page_footer('flex-end') }}
+    </div>
+</body>
+</html>
