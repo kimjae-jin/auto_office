@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>착수신고서</title>
+    <style>
+        @font-face {
+            font-family: 'AppleGothic';
+            src: url('/System/Library/Fonts/Supplemental/AppleGothic.ttf');
+        }
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+            @bottom-center {
+                content: '{{ client_name }} 귀하';
+                font-family: 'AppleGothic', sans-serif;
+                font-size: 12px;
+            }
+        }
+        body { font-family: 'AppleGothic', sans-serif; font-size: 11pt; line-height: 1.6; }
+        h1, h2, h3 { text-align: center; font-weight: bold; }
+        h1 { font-size: 24pt; margin-bottom: 50px; }
+        h2 { font-size: 16pt; margin: 60px 0 20px 0; }
+        .page-break { page-break-before: always; }
+        table { width: 100%; border-collapse: collapse; text-align: center; }
+        th, td { border: 1px solid black; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        .left-align { text-align: left; padding-left: 10px; }
+        .seal-area { position: relative; }
+        .seal-image { position: absolute; width: 40px; right: 10px; top: 5px; opacity: 0.8; }
+        .gantt-bar { background-color: #4A90E2; height: 100%; }
+    </style>
+</head>
+<body>
+    <!-- ########## 1. 표지 ########## -->
+    <h2>착 수 신 고 서</h2>
+    <h1>{{ project_name }}</h1>
+    <p style="text-align:right; margin-top: 100px;">계약년월일 : {{ contract_date }}</p>
+    <p style="text-align:right;">착수년월일 : {{ start_date }}</p>
+    <p style="text-align:right;">준공년월일 : {{ completion_date }}</p>
+    
+    <!-- ########## 2. 용역책임기술자 선임계 ########## -->
+    <div class="page-break">
+        <h2>용역책임기술자 선임계</h2>
+        <table style="margin-top: 40px;">
+            <tr><th style="width:25%;">성 명</th><td>{{ engineers[0].name }}</td></tr>
+            <tr><th>주민등록번호</th><td>{{ engineers[0].resident_no }}</td></tr>
+            <tr><th>직 위</th><td>{{ engineers[0].position }}</td></tr>
+            <tr><th>기술자격(면허)</th><td>{{ engineers[0].grade }}</td></tr>
+        </table>
+        <p style="margin-top: 30px;" class="left-align">
+            상기인을 본 용역의 용역책임기술자로 선임하여 제출하오니 승인하여 주시기 바라며, 용역수행에 만전을 기하겠습니다.
+        </p>
+    </div>
+
+    <!-- ########## 3. 참여기술자 인적사항 ########## -->
+    <div class="page-break">
+        <h2>참여기술자 인적사항</h2>
+        <table>
+            <thead>
+                <tr><th>구 분</th><th>성 명</th><th>주민등록번호</th><th>직 위</th><th>기술등급</th></tr>
+            </thead>
+            <tbody>
+                {% for engineer in engineers %}
+                <tr>
+                    <td>{{ engineer.role }}</td>
+                    <td>{{ engineer.name }}</td>
+                    <td>{{ engineer.resident_no }}</td>
+                    <td>{{ engineer.position }}</td>
+                    <td>{{ engineer.grade }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ########## 4. 보안각서 ########## -->
+    <div class="page-break">
+        <h2>보 안 각 서</h2>
+        <p class="left-align" style="margin-top:30px;">
+            본인은 {{ contract_date }} 계약 체결한 『{{ project_name }}』을 시행함에 있어 다음 사항을 준수할 것을 엄숙히 서약하며, 만일 이를 위반 시에는 어떠한 처벌도 감수할 것을 서약합니다.
+        </p>
+        <p class="left-align">1. 본 용역과 관련하여 알게 된 모든 사항은 계약기간중은 물론, 계약기간 만료 후에도 외부에 누설하지 않는다.</p>
+        <p class="left-align">2. 용역수행 책임자로서 용역수행 전반에 대한 보안상 문제점이 없도록 하고, 참여자에 대한 보안교육을 월 1회 이상 실시한다.</p>
+        
+        <h3 style="margin-top: 50px;">참여자 명단</h3>
+        <table>
+            <thead>
+                <tr><th>소 속</th><th>직 위</th><th>성 명</th><th>서 명</th></tr>
+            </thead>
+            <tbody>
+            {% for engineer in engineers %}
+                <tr>
+                    <td>{{ contractor_name }}</td>
+                    <td>{{ engineer.position }}</td>
+                    <td>{{ engineer.name }}</td>
+                    <td class="seal-area">
+                        <img src="../static/images/{{ engineer.seal_image_filename }}" class="seal-image" alt="도장">
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ########## 5. 용역 공정예정표 ########## -->
+    <div class="page-break">
+        <h2>용역 공정예정표</h2>
+        <table style="table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 20%;">공 종</th>
+                    <th colspan="12">2024년 ~ 2025년</th>
+                </tr>
+                <tr>
+                    {% for i in range(7, 13) %}<th>{{ i }}월</th>{% endfor %}
+                    {% for i in range(1, 7) %}<th>{{ i }}월</th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for task in gantt_tasks %}
+                <tr>
+                    <td class="left-align">{{ task.task_name }}</td>
+                    {% for i in range(7, 19) %}
+                    <td>
+                        {% set current_month = i if i <= 12 else i - 12 %}
+                        {% if task.start_month <= current_month < task.end_month or (task.start_month > task.end_month and (current_month >= task.start_month or current_month < task.end_month)) %}
+                        <div class="gantt-bar"> </div>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
